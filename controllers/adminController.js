@@ -1,23 +1,20 @@
 const User = require('../models/User');
+const bcrypt = require('bcryptjs');
 
-exports.getUsers = async (req, res) => {
+exports.getAdminPage = async (req, res) => {
   try {
-    const users = await User.find();
-    console.log(users); // Добавляем эту строку для проверки получения данных о пользователях
-
-    res.render('admin', { page: 'index', users: users });
+    const users = await User.find(); 
+    res.render('admin', { page: 'index', users: users }); 
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Server Error' });
   }
 };
 
-exports.addUser = async (req, res) => {
+exports.getEditUserPage = async (req, res) => {
   try {
-    const { username, password, isAdmin } = req.body;
-    const newUser = new User({ username, password, isAdmin });
-    await newUser.save();
-    res.json({ success: true, newUser });
+    const users = await User.find();
+    res.render('admin', { page: 'editUser', users: users });
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Server Error' });
@@ -26,21 +23,46 @@ exports.addUser = async (req, res) => {
 
 exports.editUser = async (req, res) => {
   try {
-    const { id } = req.params;
-    const { username, password, isAdmin } = req.body;
-    const updatedUser = await User.findByIdAndUpdate(id, { username, password, isAdmin }, { new: true });
-    res.json({ success: true, updatedUser });
+    const { userId, username, isAdmin } = req.body;
+    await User.findByIdAndUpdate(userId, { username, isAdmin });
+    res.redirect('/admin'); 
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Server Error' });
   }
 };
 
+exports.getAddUserPage = (req, res) => {
+  res.render('admin', { page: 'addUser' }); 
+};
+
+exports.addUser = async (req, res) => {
+  try {
+    const { username, password, isAdmin } = req.body;
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = new User({
+      username,
+      password: hashedPassword,
+      isAdmin: isAdmin === 'on' 
+    });
+
+    const savedUser = await newUser.save();
+
+    res.status(201).json({ success: true, user: savedUser });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: 'Server Error' });
+  }
+};
+
+
 exports.deleteUser = async (req, res) => {
   try {
-    const { id } = req.params;
-    await User.findByIdAndDelete(id);
-    res.json({ success: true, message: 'User deleted successfully' });
+    const { userId } = req.body;
+    await User.findByIdAndDelete(userId);
+    res.redirect('/admin'); 
   } catch (error) {
     console.error(error);
     res.status(500).json({ success: false, message: 'Server Error' });

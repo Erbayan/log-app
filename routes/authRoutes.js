@@ -1,16 +1,20 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const authController = require('../controllers/authController');
+const authController = require("../controllers/authController");
+const passport = require("passport");
 
-// Маршрут для входа
-router.post('/login', authController.login);
+router.post("/login", authController.login);
+router.post(
+  "/login",
+  passport.authenticate("local", { failureRedirect: "/login" }),
+  authController.login
+);
+router.get("/logout", authController.logout);
 
-// Маршрут для страницы регистрации
-router.get('/register', (req, res) => {
-    res.render('register');
-  });
-  
-  // Маршрут для регистрации нового пользователя
-  router.post('/register', authController.register);
+router.get("/register", (req, res) => {
+  res.render("register");
+});
+
+router.post("/register", authController.register);
 
 module.exports = router;
