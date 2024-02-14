@@ -2,10 +2,12 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const authRoutes = require('./routes/authRoutes');
 const adminRoutes = require('./routes/adminRoutes');
-const mainRoutes = require('./routes/mainRoutes'); // Импортируем mainRoutes
+const mainRoutes = require('./routes/mainRoutes');
 const db = require('./config/db');
 const cors = require('cors');
 const mainController = require('./controllers/mainController');
+const axios = require('axios'); // Импортируем axios
+const { getTopHeadlines, getRandomImage } = require('./api');
 
 require('dotenv').config();
 
@@ -30,12 +32,24 @@ app.get('/register', (req, res) => {
   res.render('register');
 });
 
-
-
+app.get('/main', async (req, res) => {
+    try {
+        // Получаем заголовки новостей для страны 'us'
+        const headlines = await getTopHeadlines('us');
+        // Получаем случайное изображение для города 'New York'
+        const imageUrl = await getRandomImage('New York');
+        
+        // Рендерим шаблон index.ejs и передаем данные
+        res.render('main', { headlines, imageUrl });
+    } catch (error) {
+        console.error('Error:', error);
+        res.status(500).send('Internal Server Error');
+    }
+});
 
 app.use('/auth', authRoutes);
 app.use('/admin', adminRoutes);
-app.use('/main', mainRoutes); // Добавляем mainRoutes
+app.use('/main', mainRoutes);
 
 // Запуск сервера
 const PORT = process.env.PORT || 3000;

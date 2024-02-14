@@ -3,23 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Unsplash API Demo</title>
+    <title>News and Image Demo</title>
 </head>
 <body>
-    <h1>Unsplash API Demo</h1>
-    
-    <!-- Форма для поиска изображений по цвету -->
-    <form action="/searchImagesByColor" method="post">
-        <label for="color">Enter Color:</label>
-        <input type="text" id="color" name="color" required>
-        <button type="submit">Search Images by Color</button>
+    <form action="/auth/logout" method="GET">
+        <button type="submit">Logout</button>
     </form>
-    
-    <!-- Результаты поиска изображений -->
-    <div id="images">
-        <% images.forEach(image => { %>
-            <img src="<%= image.urls.regular %>" alt="<%= image.alt_description %>">
+    <h1>Top Headlines</h1>
+    <ul>
+        <% headlines.forEach(headline => { %>
+            <li><%= headline.title %></li>
         <% }); %>
-    </div>
+    </ul>
+
+    <h1>Random Image</h1>
+    <img src="<%= imageUrl %>" alt="Random Image">
 </body>
 </html>
